@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar" id="htmlTag">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEAI | Dr. Mohamed Ghalla</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8206085263896859" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg-body: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --bg-chat: #ffffff;
+            --text-main: #333333;
+            --bg-header: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            --bg-box: #f8f9fa;
+            --bg-bot-msg: #ffffff;
+            --border-color: #eeeeee;
+            --bg-input: #ffffff;
+            --font-size-base: 14.5px; 
+            --font-family-ar: 'Cairo', sans-serif;
+            --font-family-global: 'Roboto', sans-serif;
+            --font-family-zh: 'Noto Sans SC', sans-serif;
+        }
+
+        .dark-mode {
+            --bg-body: linear-gradient(135deg, #1e1e2f 0%, #151522 100%);
+            --bg-chat: #2a2a35;
+            --text-main: #f4f4f9;
+            --bg-header: linear-gradient(90deg, #1a1a24 0%, #2a2a35 100%);
+            --bg-box: #1e1e24;
+            --bg-bot-msg: #383845;
+            --border-color: #444444;
+            --bg-input: #383845;
+        }
+
+        body { font-family: var(--font-family-ar); background: var(--bg-body); color: var(--text-main); margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: all 0.3s ease; }
+        
+        #authScreen { width: 100%; max-width: 400px; background: var(--bg-chat); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; display: block; }
+        #authScreen h2 { margin-bottom: 20px; color: #007bff; }
+        .auth-input { width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 10px; font-family: inherit; background: var(--bg-input); color: var(--text-main); outline: none; }
+        .auth-btn { width: 95%; padding: 12px; background: linear-gradient(90deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 10px; font-family: inherit;}
+        .auth-btn:hover { opacity: 0.9; }
+        .auth-switch { color: #007bff; cursor: pointer; font-size: 14px; text-decoration: underline; margin-top: 10px;}
+        #authError { color: #dc3545; font-size: 13px; margin-bottom: 10px; display: none; }
+
+        .chat-container { width: 100%; max-width: 650px; background-color: var(--bg-chat); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; flex-direction: column; height: 90vh; overflow: hidden; position: relative; }
+        
+        /* 📜 تنسيقات القائمة الجانبية (Sidebar) */
+        .sidebar-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; }
+        .sidebar { position: absolute; top: 0; right: -280px; width: 260px; height: 100%; background: var(--bg-chat); z-index: 101; transition: right 0.3s ease; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        .sidebar.open { right: 0; }
+        [dir="ltr"] .sidebar { right: auto; left: -280px; box-shadow: 5px 0 15px rgba(0,0,0,0.1); transition: left 0.3s ease; }
+        [dir="ltr"] .sidebar.open { left: 0; }
+        
+        .sidebar-header { padding: 20px 15px; background: var(--bg-header); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .close-sidebar-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .new-chat-btn { margin: 15px; padding: 10px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-family: inherit; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 5px; }
+        .new-chat-btn:hover { background: #218838; }
+        .chats-list { flex: 1; overflow-y: auto; padding: 0 15px 15px 15px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .chat-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-box); border-radius: 10px; cursor: pointer; font-size: 13px; border: 1px solid var(--border-color); }
+        .chat-item:hover { background: var(--border-color); }
+        .chat-item.active { border-color: #007bff; background: rgba(0, 123, 255, 0.05); }
+        .chat-title-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; color: var(--text-main); }
+        .chat-actions { display: flex; gap: 5px; margin-right: 5px; }
+        [dir="ltr"] .chat-actions { margin-right: 0; margin-left: 5px; }
+        .chat-action-btn { background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.5; transition: 0.2s; padding: 2px; }
+        .chat-action-btn:hover { opacity: 1; }
+        .chat-action-btn.pinned { opacity: 1; color: #ff9800; text-shadow: 0 0 5px rgba(255, 152, 0, 0.4); }
+
+        .header { background: var(--bg-header); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; cursor: pointer;}
+        .menu-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 0 5px; }
+        .verified-badge { color: #00d2ff; font-size: 14px; margin: 0 4px; text-shadow: 0 0 5px rgba(0, 210, 255, 0.5); }
+        .header-actions { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; align-items: center;}
+        
+        #langSelect { background: rgba(255,255,255,0.2); color: white; border: 1px solid transparent; padding: 6px; border-radius: 10px; font-family: inherit; font-size: 12px; cursor: pointer; outline: none; }
+        #langSelect option { color: #333; }
+
+        .icon-btn { background-color: rgba(255, 255, 255, 0.2); color: white; border: 1px solid transparent; padding: 6px 10px; border-radius: 15px; cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.3s ease; display: flex; align-items: center; gap: 4px; font-weight: 600;}
+        .icon-btn:hover { background-color: white; color: #007bff; }
+        .logout-btn { background-color: #dc3545; }
+        .logout-btn:hover { background-color: white; color: #dc3545; }
+        
+        .clinic-btn { background-color: #ff3366; color: white; border-color: transparent; }
+        .clinic-btn:hover { background-color: white; color: #ff3366; }
+        .book-btn { background-color: #ff9800; color: white; border-color: transparent; }
+        .book-btn:hover { background-color: white; color: #ff9800; }
+
+        .disclaimer-container { text-align: center; padding: 8px; background-color: #fff3cd; border-bottom: 1px solid #ffeeba; }
+        .disclaimer { font-size: 11px; color: #856404; font-weight: 600; }
+        .categories-wrapper { background-color: var(--bg-box); padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        .categories-wrapper::-webkit-scrollbar { display: none; }
+        .category-chip { background-color: var(--bg-input); color: #007bff; border: 1px solid #007bff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: 600; transition: all 0.3s ease; flex-shrink: 0; }
+        .category-chip:hover { background-color: #007bff; color: white; }
+        
+        .chat-box { flex: 1; padding: 15px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: var(--bg-box); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .message-wrapper { display: flex; align-items: flex-end; gap: 10px; animation: fadeIn 0.3s ease-out forwards; }
+        .user-wrapper { justify-content: flex-start; flex-direction: row-reverse; }
+        .bot-wrapper { justify-content: flex-start; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; background-color: var(--bg-chat); flex-shrink: 0; }
+        .message-content { display: flex; flex-direction: column; gap: 5px; max-width: 75%; }
+        .bot-name-label { font-size: 11px; color: #888; margin-bottom: -3px; display: flex; align-items: center; gap:4px;}
+        .message { padding: 12px 18px; border-radius: 20px; line-height: 1.6; font-size: var(--font-size-base); }
+        .user-message { background: linear-gradient(90deg, #007bff 0%, #0056b3 100%); color: white; border-bottom-right-radius: 5px; }
+        [dir="ltr"] .user-message { border-bottom-right-radius: 20px; border-bottom-left-radius: 5px; }
+        .bot-message { background-color: var(--bg-bot-msg); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 5px; }
+        [dir="ltr"] .bot-message { border-bottom-left-radius: 20px; border-bottom-right-radius: 5px; }
+        
+        .medical-id-bar { display: flex; justify-content: center; gap: 8px; padding: 8px; background-color: var(--bg-box); border-top: 1px solid var(--border-color); flex-wrap: wrap;}
+        .med-toggle { background-color: var(--bg-input); color: #6c757d; border: 1px solid #ced4da; padding: 5px 10px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; font-family: inherit;}
+        .med-toggle.active { background-color: #dc3545; color: white; border-color: #dc3545; }
+        .input-area { display: flex; padding: 12px 15px; background-color: var(--bg-chat); gap: 8px; align-items: center; border-top: 1px solid var(--border-color); }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 25px; font-size: 14px; font-family: inherit; background-color: var(--bg-input); color: var(--text-main); outline: none; }
+        .action-btn-round { background-color: #28a745; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: background-color 0.3s;}
+        .camera-btn { background-color: #6c757d; }
+        
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
+        .mic-recording { background-color: #dc3545 !important; animation: pulse 1.5s infinite; }
+
+        .send-btn { background-color: #007bff; color: white; border: none; padding: 10px 18px; border-radius: 25px; cursor: pointer; font-size: 15px; font-family: inherit; flex-shrink: 0; }
+        #fileInput { display: none; }
+        .speak-btn { background: none; border: none; color: #007bff; cursor: pointer; font-size: 18px; align-self: flex-start; padding: 0 5px; opacity: 0.8; margin-top: -5px; }
+        [dir="ltr"] .speak-btn { align-self: flex-end; }
+        .uploaded-image-container { position: relative; max-width: 200px; border-radius: 10px; overflow: hidden; margin-bottom: 5px; border: 2px solid #007bff; }
+        .uploaded-image-container img { width: 100%; display: block; }
+
+        /* 🏥 تنسيقات نافذة العيادات المنبثقة */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: var(--bg-chat); padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .modal-title { margin-bottom: 20px; font-weight: bold; color: var(--text-main); font-size: 18px; }
+        .clinic-option-btn { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: var(--bg-box); border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; color: var(--text-main); font-family: inherit; font-weight: bold; font-size: 15px; transition: 0.2s; text-align: center;}
+        .clinic-option-btn:hover { background: rgba(0, 123, 255, 0.1); color: #007bff; border-color: #007bff; }
+        .cancel-modal-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: inherit; margin-top: 10px; width: 100%; font-weight: bold;}
+    </style>
+</head>
+<body class="lang-ar">
+
+    <div class="modal-overlay" id="clinicModal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitleText">اختر العيادة للحجز</div>
+            <button class="clinic-option-btn" onclick="selectClinic('GHALLA Dental Clinic')">🏥 GHALLA Dental Clinic</button>
+            <button class="clinic-option-btn" onclick="selectClinic('Clintco')">🏥 Clintco Dental</button>
+            <button class="clinic-option-btn" onclick="selectClinic('Smile Care Center')">🏥 Smile Care Center</button>
+            <button class="cancel-modal-btn" onclick="closeClinicModal()" id="cancelModalBtn">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="authScreen">
+        <h2 id="authTitle">👨‍⚕️ DEAI Clinic</h2>
+        <p id="authDesc" style="color: var(--text-main); font-size: 14px; margin-bottom: 20px;">سجل دخولك ليحتفظ الذكاء الاصطناعي بملفك الطبي</p>
+        
+        <div id="authError"></div>
+        <input type="email" id="emailInput" class="auth-input" placeholder="Email">
+        <input type="password" id="passwordInput" class="auth-input" placeholder="Password">
+        
+        <button class="auth-btn" id="loginBtn" onclick="handleAuth()">تسجيل الدخول</button>
+        <p class="auth-switch" onclick="toggleAuthMode()" id="authModeText">ليس لديك حساب؟ إنشاء حساب جديد</p>
+    </div>
+
+    <div class="chat-container" id="mainApp">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span style="font-weight: bold; font-size: 16px;" id="sidebarTitle">سجل المحادثات</span>
+                <button class="close-sidebar-btn" onclick="closeSidebar()">✖</button>
+            </div>
+            <button class="new-chat-btn" onclick="createNewChat()">➕ <span id="newChatText">محادثة جديدة</span></button>
+            <div class="chats-list" id="chatsList"></div>
+        </div>
+
+        <div class="header">
+            <span class="header-title" onclick="openSidebar()"><button class="menu-btn">☰</button> 👨‍⚕️ DEAI <span class="verified-badge">✔️</span></span>
+            <div class="header-actions">
+                <select id="langSelect" onchange="changeLanguage(this.value)">
+                    <option value="ar" selected>العربية</option>
+                    <option value="en">English</option>
+                    <option value="zh">中文</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                </select>
+                <button class="icon-btn book-btn" onclick="openClinicModal()" id="bookBtnText">📅 حجز موعد</button>
+                <button class="icon-btn clinic-btn" onclick="findEmergencyClinic()" id="emergencyBtnText">🚨 طوارئ</button>
+                
+                <button class="icon-btn logout-btn" onclick="handleLogout()" id="logoutBtnText">🚪 خروج</button>
+            </div>
+        </div>
+        
+        <div class="disclaimer-container">
+            <span class="disclaimer" id="disclaimerText">تنبيه: هذا التقرير للإرشاد الطبي ولا يغني عن تشخيص الطبيب. Designed by Dr. Mohamed Ghalla.</span>
+        </div>
+        
+        <div class="categories-wrapper" id="categoriesWrapper"></div>
+
+        <div class="chat-box" id="chatBox"></div>
+
+        <div class="medical-id-bar" id="medicalIdBar">
+            <button class="med-toggle" id="btnPregnant" onclick="toggleMedical('pregnant', this)">🤰 <span id="textPreg">حامل</span></button>
+            <button class="med-toggle" id="btnChronic" onclick="toggleMedical('chronic', this)">🩸 <span id="textChro">سكر/ضغط</span></button>
+            <button class="med-toggle" id="btnAllergy" onclick="toggleMedical('allergy', this)">💊 <span id="textAlle">حساسية</span></button>
+        </div>
+
+        <div class="input-area">
+            <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+            <button class="action-btn-round camera-btn" onclick="triggerCameraClick()">📷</button>
+            <button class="action-btn-round" id="micBtn" onclick="toggleVoiceInput()">🎤</button>
+            <input type="text" id="userInput" placeholder="اصف ما تشعر به هنا..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">إرسال 🚀</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuZYl3EBenayNZzOY-bhBlRu911Ur86lk",
+            authDomain: "deai-app-b68ff.firebaseapp.com",
+            projectId: "deai-app-b68ff",
+            storageBucket: "deai-app-b68ff.firebasestorage.app",
+            messagingSenderId: "407487201900",
+            appId: "1:407487201900:web:31afb2812343f07e49ce49"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // مفتاحك السري
+        window.GROQ_API_KEY = "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"; 
+        
+        window.medicalState = { pregnant: false, chronic: false, allergy: false };
+        window.pendingImageBase64 = null;
+        window.isLoginMode = true;
+        window.currentUser = null;
+        window.currentLang = 'ar';
+        window.isListening = false; 
+        
+        window.chatsData = {}; 
+        window.currentChatId = null;
+        window.isDataLoaded = false; 
+
+        const translations = {
+            ar: { modalTitle: "اختر العيادة للحجز", cancel: "إلغاء", bookConfirm: "✅ تم تسجيل طلب الحجز المبدئي في عيادة **{clinic}** بنجاح. سيتم التواصل معك قريباً لتأكيد الموعد!", sidebarTitle: "سجل المحادثات", newChatText: "محادثة جديدة", emergency: "🚨 طوارئ", book: "📅 حجز موعد", authDesc: "سجل دخولك ليحتفظ الذكاء الاصطناعي بملفك الطبي", login: "تسجيل الدخول", signup: "إنشاء حساب", toSignup: "ليس لديك حساب؟ إنشاء حساب", toLogin: "لديك حساب بالفعل؟ تسجيل الدخول", logout: "🚪 خروج", disclaimer: "تنبيه: للإرشاد الطبي ولا يغني عن الطبيب. Dr. Mohamed Ghalla.", pregnant: "حامل", chronic: "سكر/ضغط", allergy: "حساسية", placeholder: "اصف ما تشعر به هنا...", send: "إرسال 🚀", welcome: "مرحباً! أنا DEAI. اكتب شكواك أو ارفع صورة لأسنانك.", thinking: "الطبيب يحلل...", cats: ["⚡ ألم أسنان", "🪥 عناية يومية", "🦷 تقويم وزراعة"], prompts: ["لدي ألم في أسناني", "كيف أعتني بأساني يومياً؟", "ما هي أنواع تقويم الأسنان؟"] },
+            en: { modalTitle: "Choose a Clinic", cancel: "Cancel", bookConfirm: "✅ Your preliminary booking at **{clinic}** has been recorded successfully. We will contact you soon to confirm!", sidebarTitle: "Chat History", newChatText: "New Chat", emergency: "🚨 Emergency", book: "📅 Book Appt", authDesc: "Login to keep your medical history saved with AI", login: "Login", signup: "Sign Up", toSignup: "No account? Create one", toLogin: "Have an account? Login", logout: "🚪 Logout", disclaimer: "Disclaimer: For guidance only. Dr. Mohamed Ghalla.", pregnant: "Pregnant", chronic: "Chronic Dis.", allergy: "Allergy", placeholder: "Describe symptoms...", send: "Send 🚀", welcome: "Welcome! I am DEAI. Write your complaint or upload a photo.", thinking: "Doctor is analyzing...", cats: ["⚡ Toothache", "🪥 Daily Care", "🦷 Braces"], prompts: ["I have a toothache", "How to take care of my teeth daily?", "What are the types of braces?"] },
+            zh: { modalTitle: "选择诊所", cancel: "取消", bookConfirm: "✅ 您在 **{clinic}** 的初步预约已成功记录。我们将很快与您联系以确认！", sidebarTitle: "聊天记录", newChatText: "新聊天", emergency: "🚨 急诊", book: "📅 预约", authDesc: "登录以让 AI 保存您的医疗史", login: "登录", signup: "注册", toSignup: "没有账号？注册", toLogin: "已有账号？登录", logout: "🚪 退出", disclaimer: "免责声明：仅供参考。Dr. Mohamed Ghalla.", pregnant: "怀孕", chronic: "慢性病", allergy: "过敏", placeholder: "描述您的症状...", send: "发送 🚀", welcome: "欢迎！我是 DEAI。写下您的症状或上传照片。", thinking: "医生正在分析...", cats: ["⚡ 牙痛", "🪥 日常护理", "🦷 牙套"], prompts: ["我牙痛", "如何日常护理牙齿？", "牙套有哪些类型？"] },
+            fr: { modalTitle: "Choisissez une clinique", cancel: "Annuler", bookConfirm: "✅ Votre demande de réservation à **{clinic}** a été enregistrée avec succès. Nous vous contacterons bientôt !", sidebarTitle: "Historique", newChatText: "Nouveau Chat", emergency: "🚨 Urgence", book: "📅 Réserver", authDesc: "Connectez-vous pour que l'IA conserve votre historique", login: "Connexion", signup: "S'inscrire", toSignup: "Pas de compte ? Créer", toLogin: "Déjà un compte ? Connexion", logout: "🚪 Déconnexion", disclaimer: "Avis: À titre indicatif seulement. Dr. Mohamed Ghalla.", pregnant: "Enceinte", chronic: "Maladie Chro.", allergy: "Allergie", placeholder: "Décrivez vos symptômes...", send: "Envoyer 🚀", welcome: "Bienvenue ! Je suis DEAI. Écrivez votre plainte ou envoyez une photo.", thinking: "Le docteur analyse...", cats: ["⚡ Mal aux dents", "🪥 Soins", "🦷 Appareil"], prompts: ["J'ai mal aux dents", "Comment prendre soin de mes dents ?", "Quels sont les appareils ?"] },
+            de: { modalTitle: "Klinik wählen", cancel: "Abbrechen", bookConfirm: "✅ Ihre vorläufige Buchung in der **{clinic}** wurde erfolgreich erfasst. Wir werden Sie bald kontaktieren!", sidebarTitle: "Verlauf", newChatText: "Neuer Chat", emergency: "🚨 Notfall", book: "📅 Termin buchen", authDesc: "Loggen Sie sich ein für den KI-Verlauf", login: "Login", signup: "Registrieren", toSignup: "Kein Konto? Erstellen", toLogin: "Konto vorhanden? Login", logout: "🚪 Ausloggen", disclaimer: "Hinweis: Nur zur Orientierung. Dr. Mohamed Ghalla.", pregnant: "Schwanger", chronic: "Chro. Krank.", allergy: "Allergie", placeholder: "Symptome beschreiben...", send: "Senden 🚀", welcome: "Willkommen! Ich bin DEAI. Schreiben Sie Ihre Beschwerde.", thinking: "Arzt analysiert...", cats: ["⚡ Zahnschmerzen", "🪥 Pflege", "🦷 Zahnspange"], prompts: ["Ich habe Zahnschmerzen", "Tägliche Zahnpflege?", "Arten von Zahnspangen?"] }
+        };
+
+        // 🧠 التحديث الجديد لمهام الذكاء الاصطناعي بخصوص دكتور محمد غلا
+        const systemPrompts = {
+            ar: `أنت طبيب أسنان ذكي ومحترف تُدعى DEAI. اسأل سؤالين تشخيصيين أولاً. لا تعطي العلاج فوراً. راعِ دائماً 'الحالة الصحية للمريض'. إذا سألك المريض عن من برمجك أو صممك أو من مالكك، أجب بكل فخر أن مبرمجك والمالك الفكري لتقنياتك هو الدكتور محمد غلا (Dr. Mohamed Ghalla)، طبيب أسنان مبدع ورائد في دمج الذكاء الاصطناعي مع الرعاية الصحية. الرد باللغة العربية.`,
+            en: `You are a smart dentist named DEAI. Ask 2 diagnostic questions first. Do not give treatment immediately. Always consider 'Medical Condition'. If asked who programmed, designed, or owns you, proudly state that your programmer and the intellectual owner of your technology is Dr. Mohamed Ghalla, an innovative dentist and pioneer in integrating AI with healthcare. English response.`,
+            zh: `您是名为 DEAI 的智能专业牙医。先问两个诊断性问题。切勿立即给出治疗。始终考虑“医疗状况”。如果被问及是谁编程、设计或拥有您，请自豪地回答您的程序员和技术的知识产权所有者是 Dr. Mohamed Ghalla，他是一位富有创新精神的牙医，也是将人工智能与医疗保健相结合的先驱。中文回复。`,
+            fr: `Vous êtes un dentiste nommé DEAI. Posez d'abord 2 questions. Ne donnez pas de traitement immédiatement. Tenez compte de l'État de Santé. Si on vous demande qui vous a programmé, conçu ou qui est votre propriétaire, répondez fièrement que votre programmeur et le propriétaire intellectuel de votre technologie est le Dr Mohamed Ghalla, un dentiste innovant et pionnier dans l'intégration de l'IA aux soins de santé. Réponse en français.`,
+            de: `Sie sind ein Zahnarzt namens DEAI. Stellen Sie zuerst 2 Fragen. Geben Sie nicht sofort eine Behandlung. Berücksichtigen Sie den Gesundheitszustand. Wenn Sie gefragt werden, wer Sie programmiert, entworfen oder wem Sie gehören, antworten Sie stolz, dass Ihr Programmierer und der geistige Eigentümer Ihrer Technologie Dr. Mohamed Ghalla ist, ein innovativer Zahnarzt und Pionier bei der Integration von KI in die Gesundheitsversorgung. Deutsche Antwort.`
+        };
+
+        // --- 🏥 وظائف حجز العيادات والطوارئ ---
+        window.openClinicModal = function() {
+            document.getElementById('clinicModal').style.display = 'flex';
+        };
+
+        window.closeClinicModal = function() {
+            document.getElementById('clinicModal').style.display = 'none';
+        };
+
+        window.selectClinic = function(clinicName) {
+            window.closeClinicModal();
+            if(!window.currentChatId) return;
+            
+            const t = translations[window.currentLang];
+            const msg = t.bookConfirm.replace("{clinic}", clinicName);
+            
+            window.appendMessage(msg, "bot");
+            window.chatsData[window.currentChatId].history.push({ role: "assistant", content: msg });
+            window.saveDataToFirebase();
+        };
+
+        window.findEmergencyClinic = function() {
+            const queries = { ar: "اقرب عيادة اسنان طوارئ", en: "nearest emergency dental clinic", zh: "最近的急诊牙科诊所", fr: "clinique dentaire d'urgence la plus proche", de: "nächste zahnärztliche notfallklinik" };
+            window.open(`https://www.google.com/maps/search/${encodeURIComponent(queries[window.currentLang])}`, '_blank'); 
+        };
+
+        // --- 📜 Sidebar Functions ---
+        window.openSidebar = function() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').style.display = 'block'; window.renderSidebar(); };
+        window.closeSidebar = function() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display = 'none'; };
+
+        window.renderSidebar = function() {
+            const list = document.getElementById('chatsList');
+            list.innerHTML = '';
+            const sortedChats = Object.keys(window.chatsData).sort((a, b) => {
+                if (window.chatsData[a].pinned && !window.chatsData[b].pinned) return -1;
+                if (!window.chatsData[a].pinned && window.chatsData[b].pinned) return 1;
+                return window.chatsData[b].date - window.chatsData[a].date;
+            });
+
+            sortedChats.forEach(chatId => {
+                const chat = window.chatsData[chatId];
+                const item = document.createElement('div');
+                item.className = `chat-item ${chatId === window.currentChatId ? 'active' : ''}`;
+                item.onclick = () => loadChat(chatId);
+                
+                item.innerHTML = `
+                    <div class="chat-title-text" title="${chat.title}">${chat.title}</div>
+                    <div class="chat-actions">
+                        <button class="chat-action-btn ${chat.pinned ? 'pinned' : ''}" onclick="event.stopPropagation(); togglePin('${chatId}')" title="تثبيت/إلغاء">📌</button>
+                        <button class="chat-action-btn" onclick="event.stopPropagation(); deleteChat('${chatId}')" title="حذف">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        };
+
+        window.createNewChat = function(autoSave = true) {
+            const chatId = "chat_" + Date.now();
+            window.chatsData[chatId] = {
+                title: translations[window.currentLang].newChatText,
+                history: [ { role: "system", content: systemPrompts[window.currentLang] } ],
+                pinned: false,
+                date: Date.now()
+            };
+            loadChat(chatId, autoSave);
+            if(window.innerWidth < 768) closeSidebar();
+        };
+
+        window.loadChat = function(chatId, autoSave = true) {
+            window.currentChatId = chatId;
+            document.getElementById('chatBox').innerHTML = '';
+            
+            const history = window.chatsData[chatId].history;
+            if (history.length === 1) { 
+                window.appendMessage(translations[window.currentLang].welcome, "bot");
+            } else {
+                history.forEach(msg => {
+                    if(msg.role !== 'system') {
+                        let cleanText = typeof msg.content === 'string' ? msg.content.replace(/ \[Alert:.*?\]/g, "") : "[صورة مرفقة]";
+                        window.appendMessage(cleanText, msg.role === 'user' ? 'user' : 'bot', null, false, true);
+                    }
+                });
+            }
+            renderSidebar();
+            if(autoSave) window.saveDataToFirebase();
+        };
+
+        window.togglePin = function(chatId) { window.chatsData[chatId].pinned = !window.chatsData[chatId].pinned; renderSidebar(); window.saveDataToFirebase(); };
+        window.deleteChat = function(chatId) {
+            if(confirm("تأكيد الحذف؟ / Delete?")) {
+                delete window.chatsData[chatId];
+                if (chatId === window.currentChatId) {
+                    const remainingChats = Object.keys(window.chatsData);
+                    if(remainingChats.length > 0) loadChat(remainingChats[0]);
+                    else createNewChat();
+                } else { renderSidebar(); }
+                window.saveDataToFirebase();
+            }
+        };
+
+        // --- 🌐 Language & Voice Functions ---
+        window.changeLanguage = function(lang) {
+            window.currentLang = lang;
+            const t = translations[lang];
+            
+            document.getElementById('authDesc').innerText = t.authDesc;
+            document.getElementById('loginBtn').innerText = window.isLoginMode ? t.login : t.signup;
+            document.getElementById('authModeText').innerText = window.isLoginMode ? t.toSignup : t.toLogin;
+            document.getElementById('sidebarTitle').innerText = t.sidebarTitle;
+            document.getElementById('newChatText').innerText = t.newChatText;
+            document.getElementById('emergencyBtnText').innerText = t.emergency;
+            document.getElementById('bookBtnText').innerText = t.book;
+            
+            document.getElementById('modalTitleText').innerText = t.modalTitle;
+            document.getElementById('cancelModalBtn').innerText = t.cancel;
+            
+            document.getElementById('htmlTag').dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            document.getElementById('htmlTag').lang = lang;
+            
+            if(lang === 'ar') document.body.style.fontFamily = "var(--font-family-ar)";
+            else if(lang === 'zh') document.body.style.fontFamily = "var(--font-family-zh)";
+            else document.body.style.fontFamily = "var(--font-family-global)";
+
+            document.getElementById('logoutBtnText').innerText = t.logout;
+            document.getElementById('disclaimerText').innerText = t.disclaimer;
+            document.getElementById('textPreg').innerText = t.pregnant;
+            document.getElementById('textChro').innerText = t.chronic;
+            document.getElementById('textAlle').innerText = t.allergy;
+            document.getElementById('userInput').placeholder = t.placeholder;
+            document.getElementById('sendBtn').innerText = t.send;
+
+            const catsWrapper = document.getElementById('categoriesWrapper');
+            catsWrapper.innerHTML = '';
+            t.cats.forEach((cat, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'category-chip';
+                btn.innerText = cat;
+                btn.onclick = () => sendCategoryPrompt(t.prompts[index]);
+                catsWrapper.appendChild(btn);
+            });
+
+            if(window.currentChatId && window.chatsData[window.currentChatId]) {
+                window.chatsData[window.currentChatId].history[0] = { role: "system", content: systemPrompts[lang] };
+            }
+        };
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            window.recognition = new SpeechRecognition();
+            window.recognition.continuous = false;
+            window.recognition.interimResults = false;
+            window.recognition.onstart = () => { window.isListening = true; document.getElementById('micBtn').classList.add('mic-recording'); };
+            window.recognition.onresult = (event) => {
+                document.getElementById('userInput').value = event.results[0][0].transcript;
+                setTimeout(() => window.sendMessage(), 500); 
+            };
+            window.recognition.onend = () => { window.isListening = false; document.getElementById('micBtn').classList.remove('mic-recording'); };
+            window.recognition.onerror = () => { window.isListening = false; document.getElementById('micBtn').classList.remove('mic-recording'); };
+        }
+
+        window.toggleVoiceInput = function() {
+            if (!SpeechRecognition) return alert("Browser does not support speech recognition.");
+            if (window.isListening) { window.recognition.stop(); } 
+            else {
+                const langMap = { ar: 'ar-SA', en: 'en-US', zh: 'zh-CN', fr: 'fr-FR', de: 'de-DE' };
+                window.recognition.lang = langMap[window.currentLang];
+                window.recognition.start();
+            }
+        };
+
+        window.speakOutLoud = function(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const cleanText = text.replace(/\*/g, '').replace(/<[^>]*>?/gm, ''); 
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                const langMap = { ar: 'ar-SA', en: 'en-US', zh: 'zh-CN', fr: 'fr-FR', de: 'de-DE' };
+                utterance.lang = langMap[window.currentLang];
+                utterance.rate = 0.9; 
+                window.speechSynthesis.speak(utterance);
+            }
+        };
+
+        // --- 🔑 Firebase Auth ---
+        window.toggleAuthMode = function() {
+            window.isLoginMode = !window.isLoginMode;
+            const t = translations[window.currentLang];
+            document.getElementById('loginBtn').innerText = window.isLoginMode ? t.login : t.signup;
+            document.getElementById('authModeText').innerText = window.isLoginMode ? t.toSignup : t.toLogin;
+            document.getElementById('authError').style.display = 'none';
+        };
+
+        window.handleAuth = async function() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('authError');
+            if(!email || !password) { errorDiv.innerText = "Please fill fields"; errorDiv.style.display = 'block'; return; }
+            try {
+                if(window.isLoginMode) await signInWithEmailAndPassword(auth, email, password);
+                else await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) { errorDiv.innerText = "Error: " + error.message; errorDiv.style.display = 'block'; }
+        };
+
+        window.handleLogout = async function() {
+            if('speechSynthesis' in window) window.speechSynthesis.cancel();
+            await signOut(auth);
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                window.isDataLoaded = false; 
+
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
+                changeLanguage('ar');
+
+                try {
+                    const docRef = doc(db, "patients", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        window.medicalState = data.medicalState || { pregnant: false, chronic: false, allergy: false };
+                        
+                        document.getElementById('btnPregnant').classList.toggle('active', window.medicalState.pregnant);
+                        document.getElementById('btnChronic').classList.toggle('active', window.medicalState.chronic);
+                        document.getElementById('btnAllergy').classList.toggle('active', window.medicalState.allergy);
+
+                        if (data.chats && Object.keys(data.chats).length > 0) {
+                            window.chatsData = data.chats;
+                            const savedCurrent = data.currentChatId;
+                            if(savedCurrent && window.chatsData[savedCurrent]) loadChat(savedCurrent, false);
+                            else loadChat(Object.keys(window.chatsData)[0], false);
+                        } else {
+                            window.chatsData = {};
+                            createNewChat(false);
+                        }
+                    } else {
+                        window.chatsData = {};
+                        createNewChat(false);
+                    }
+                } catch(err) {
+                    console.error("Memory load error:", err);
+                    window.chatsData = {};
+                    createNewChat(false);
+                } finally {
+                    window.isDataLoaded = true; 
+                }
+            } else {
+                window.currentUser = null;
+                window.isDataLoaded = false;
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('authScreen').style.display = 'block';
+                window.currentLang = 'ar';
+                changeLanguage('ar');
+            }
+        });
+
+        window.saveDataToFirebase = async function() {
+            try {
+                if(!window.currentUser || !window.isDataLoaded) return;
+                const docRef = doc(db, "patients", window.currentUser.uid);
+                await setDoc(docRef, { chats: window.chatsData, currentChatId: window.currentChatId, medicalState: window.medicalState }, { merge: true });
+            } catch(e) { console.error("Save error:", e); }
+        };
+
+        window.toggleMedical = function(type, btn) { window.medicalState[type] = !window.medicalState[type]; btn.classList.toggle('active'); window.saveDataToFirebase(); };
+        window.toggleTheme = function() { document.body.classList.toggle("dark-mode"); };
+        window.triggerCameraClick = function() { document.getElementById('fileInput').click(); };
+        window.sendCategoryPrompt = function(text) { document.getElementById("userInput").value = text; window.sendMessage(); };
+        window.handleKeyPress = function(e) { if(e.key === "Enter") window.sendMessage(); };
+
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                window.pendingImageBase64 = e.target.result;
+                const imgPrompts = { ar: "أرجو تحليل هذه الصورة.", en: "Analyze this image.", zh: "分析这张图片。", fr: "Analyser cette image.", de: "Analysiere dieses Bild." };
+                document.getElementById('userInput').value = imgPrompts[window.currentLang];
+                window.sendMessage(); 
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.sendMessage = async function() {
+            try {
+                if('speechSynthesis' in window) window.speechSynthesis.cancel();
+                
+                const userInput = document.getElementById("userInput");
+                const sendBtn = document.getElementById("sendBtn");
+                const userText = userInput.value.trim();
+
+                if (userText === "" && !window.pendingImageBase64) return;
+
+                if (window.chatsData[window.currentChatId].history.length === 1 && !window.pendingImageBase64) {
+                    window.chatsData[window.currentChatId].title = userText.substring(0, 20) + "...";
+                    renderSidebar();
+                }
+
+                if(window.pendingImageBase64) {
+                    const imgHTML = `<div class="uploaded-image-container"><img src="${window.pendingImageBase64}"></div><div>${userText}</div>`;
+                    window.appendMessage(imgHTML, "user", null, true); 
+                } else { window.appendMessage(userText, "user"); }
+
+                userInput.value = ""; userInput.disabled = true; sendBtn.disabled = true;
+
+                let medContext = ""; let conditions = [];
+                const t = translations[window.currentLang];
+                if(window.medicalState.pregnant) conditions.push(t.pregnant);
+                if(window.medicalState.chronic) conditions.push(t.chronic);
+                if(window.medicalState.allergy) conditions.push(t.allergy);
+                if(conditions.length > 0) medContext = ` [Alert: ${conditions.join(", ")}]`;
+
+                let modelToUse = "llama-3.3-70b-versatile";
+                let historyToSend = [];
+
+                if(window.pendingImageBase64) {
+                    modelToUse = "llama-3.2-11b-vision-preview"; 
+                    const visionInstruction = (window.currentLang === 'ar') ? "انظر للصورة وشخص الحالة.\n" : "Look at image and diagnose.\n";
+                    historyToSend = [ { role: "user", content: [ { type: "text", text: visionInstruction + userText + medContext }, { type: "image_url", image_url: { url: window.pendingImageBase64 } } ] } ];
+                    window.chatsData[window.currentChatId].history.push({ role: "user", content: userText + medContext + " [Image]" });
+                    window.pendingImageBase64 = null; 
+                } else {
+                    window.chatsData[window.currentChatId].history.push({ role: "user", content: userText + medContext });
+                    historyToSend = [...window.chatsData[window.currentChatId].history];
+                }
+
+                window.chatsData[window.currentChatId].date = Date.now();
+                window.saveDataToFirebase();
+                renderSidebar(); 
+
+                const loadingId = "loading-" + Date.now();
+                window.appendMessage(translations[window.currentLang].thinking, "bot", loadingId);
+
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${window.GROQ_API_KEY}` },
+                    body: JSON.stringify({ model: modelToUse, messages: historyToSend, temperature: 0.3 })
+                });
+
+                const data = await response.json();
+                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+
+                if (data.choices && data.choices.length > 0) {
+                    let aiReply = data.choices[0].message.content;
+                    window.appendMessage(aiReply, "bot");
+                    window.chatsData[window.currentChatId].history.push({ role: "assistant", content: aiReply });
+                    window.saveDataToFirebase();
+                } else if (data.error) {
+                    window.appendMessage("🛑 خطأ (API Key): " + data.error.message, "bot");
+                }
+            } catch (error) {
+                window.appendMessage(`🛑 عطل: ${error.message}`, "bot");
+            } finally {
+                document.getElementById("userInput").disabled = false; 
+                document.getElementById("sendBtn").disabled = false; 
+                document.getElementById("userInput").focus();
+            }
+        };
+
+        window.appendMessage = function(text, role, id = null, isHtml = false, isHistory = false) {
+            const chatBox = document.getElementById("chatBox");
+            const wrapperDiv = document.createElement("div");
+            wrapperDiv.className = `message-wrapper ${role === 'user' ? 'user-wrapper' : 'bot-wrapper'}`;
+            if (id) wrapperDiv.id = id;
+            
+            let textStr = typeof text === 'string' ? text : JSON.stringify(text);
+            const displayCleanText = textStr.replace(/ \[Alert:.*?\]/g, "");
+            let formattedText = isHtml ? displayCleanText : displayCleanText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            const safeSpeakText = displayCleanText.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, " ");
+
+            wrapperDiv.innerHTML = `
+                <div class="avatar">${role === 'user' ? '👤' : '👨‍⚕️'}</div>
+                <div class="message-content">
+                    ${role === 'bot' ? `<span class="bot-name-label">DEAI <span class="verified-badge">✔️</span></span>` : ''}
+                    <div class="message ${role}-message">${formattedText}</div>
+                    ${role === 'bot' && !id && !isHtml ? `<button class="speak-btn" onclick="speakOutLoud('${safeSpeakText}')" title="استمع للرد">🔊</button>` : ''}
+                </div>
+            `;
+            chatBox.appendChild(wrapperDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+    </script>
+</body>
+</html>
