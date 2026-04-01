@@ -232,8 +232,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // مفتاحك السري
-        window.GROQ_API_KEY = "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"; 
+        // مفتاحك السري مضاف هنا بشكل صحيح وجاهز للعمل
+        window.GROQ_API_KEY = "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"; 
         
         window.medicalState = { pregnant: false, chronic: false, allergy: false };
         window.pendingImageBase64 = null;
@@ -254,7 +254,6 @@
             de: { modalTitle: "Klinik wählen", cancel: "Abbrechen", bookConfirm: "✅ Ihre vorläufige Buchung in der **{clinic}** wurde erfolgreich erfasst. Wir werden Sie bald kontaktieren!", sidebarTitle: "Verlauf", newChatText: "Neuer Chat", emergency: "🚨 Notfall", book: "📅 Termin buchen", authDesc: "Loggen Sie sich ein für den KI-Verlauf", login: "Login", signup: "Registrieren", toSignup: "Kein Konto? Erstellen", toLogin: "Konto vorhanden? Login", logout: "🚪 Ausloggen", disclaimer: "Hinweis: Nur zur Orientierung. Dr. Mohamed Ghalla.", pregnant: "Schwanger", chronic: "Chro. Krank.", allergy: "Allergie", placeholder: "Symptome beschreiben...", send: "Senden 🚀", welcome: "Willkommen! Ich bin DEAI. Schreiben Sie Ihre Beschwerde.", thinking: "Arzt analysiert...", cats: ["⚡ Zahnschmerzen", "🪥 Pflege", "🦷 Zahnspange"], prompts: ["Ich habe Zahnschmerzen", "Tägliche Zahnpflege?", "Arten von Zahnspangen?"] }
         };
 
-        // 🧠 التحديث الجديد لمهام الذكاء الاصطناعي بخصوص دكتور محمدغلة
         const systemPrompts = {
             ar: `أنت طبيب أسنان ذكي ومحترف تُدعى DEAI. اسأل سؤالين تشخيصيين أولاً. لا تعطي العلاج فوراً. راعِ دائماً 'الحالة الصحية للمريض'. إذا سألك المريض عن من برمجك أو صممك أو من مالكك، أجب بكل فخر أن مبرمجي والمالك الفكري لتقنياتك هو الدكتور محمد غلة (Dr. Mohamed Ghalla)، طبيب أسنان مبدع ورائد في دمج الذكاء الاصطناعي مع الرعاية الصحية. الرد باللغة العربية.`,
             en: `You are a smart dentist named DEAI. Ask 2 diagnostic questions first. Do not give treatment immediately. Always consider 'Medical Condition'. If asked who programmed, designed, or owns you, proudly state that your programmer and the intellectual owner of your technology is Dr. Mohamed Ghalla, an innovative dentist and pioneer in integrating AI with healthcare. English response.`,
@@ -263,7 +262,6 @@
             de: `Sie sind ein Zahnarzt namens DEAI. Stellen Sie zuerst 2 Fragen. Geben Sie nicht sofort eine Behandlung. Berücksichtigen Sie den Gesundheitszustand. Wenn Sie gefragt werden, wer Sie programmiert, entworfen oder wem Sie gehören, antworten Sie stolz, dass Ihr Programmierer und der geistige Eigentümer Ihrer Technologie Dr. Mohamed Ghalla ist, ein innovativer Zahnarzt und Pionier bei der Integration von KI in die Gesundheitsversorgung. Deutsche Antwort.`
         };
 
-        // --- 🏥 وظائف حجز العيادات والطوارئ ---
         window.openClinicModal = function() {
             document.getElementById('clinicModal').style.display = 'flex';
         };
@@ -289,7 +287,6 @@
             window.open(`https://www.google.com/maps/search/${encodeURIComponent(queries[window.currentLang])}`, '_blank'); 
         };
 
-        // --- 📜 Sidebar Functions ---
         window.openSidebar = function() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').style.display = 'block'; window.renderSidebar(); };
         window.closeSidebar = function() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display = 'none'; };
 
@@ -363,7 +360,6 @@
             }
         };
 
-        // --- 🌐 Language & Voice Functions ---
         window.changeLanguage = function(lang) {
             window.currentLang = lang;
             const t = translations[lang];
@@ -445,7 +441,6 @@
             }
         };
 
-        // --- 🔑 Firebase Auth ---
         window.toggleAuthMode = function() {
             window.isLoginMode = !window.isLoginMode;
             const t = translations[window.currentLang];
