@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <meta name="description" content="عيادة DEAI للدكتور محمد غلا - أول عيادة أسنان ذكية تعتمد على الذكاء الاصطناعي للتشخيص المبدئي وحجز المواعيد.">
-    <meta name="google-site-verification" content="google0f76ba58eee84077" />
     <title>DEAI | Dr. Mohamed Ghalla</title>
+    <!-- استدعاء الخطوط المستخدمة في التصميم -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8206085263896859" crossorigin="anonymous"></script>
     <style>
+        /* 
+           هنا نقوم بتعريف الألوان الأساسية للموقع (المتغيرات).
+           هذا يسهل علينا تغيير ألوان الموقع بالكامل من مكان واحد.
+        */
         :root {
             --bg-body: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             --bg-chat: #ffffff;
@@ -37,8 +40,10 @@
             --bg-input: #383845;
         }
 
+        /* تنسيقات عامة للصفحة لتكون في المنتصف */
         body { font-family: var(--font-family-ar); background: var(--bg-body); color: var(--text-main); margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: all 0.3s ease; }
         
+        /* تنسيقات شاشة تسجيل الدخول */
         #authScreen { width: 100%; max-width: 400px; background: var(--bg-chat); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; display: block; }
         #authScreen h2 { margin-bottom: 20px; color: #007bff; }
         .auth-input { width: 90%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 10px; font-family: inherit; background: var(--bg-input); color: var(--text-main); outline: none; }
@@ -47,6 +52,7 @@
         .auth-switch { color: #007bff; cursor: pointer; font-size: 14px; text-decoration: underline; margin-top: 10px;}
         #authError { color: #dc3545; font-size: 13px; margin-bottom: 10px; display: none; }
 
+        /* تنسيقات واجهة المحادثة الرئيسية */
         .chat-container { width: 100%; max-width: 650px; background-color: var(--bg-chat); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; flex-direction: column; height: 90vh; overflow: hidden; position: relative; }
         
         /* 📜 تنسيقات القائمة الجانبية (Sidebar) */
@@ -151,6 +157,7 @@
         </div>
     </div>
 
+    <!-- شاشة تسجيل الدخول -->
     <div id="authScreen">
         <h2 id="authTitle"> DE-AI </h2>
         <p id="authDesc" style="color: var(--text-main); font-size: 14px; margin-bottom: 20px;">سجل دخولك ليحتفظ الذكاء الاصطناعي بملفك الطبي</p>
@@ -163,6 +170,7 @@
         <p class="auth-switch" onclick="toggleAuthMode()" id="authModeText">ليس لديك حساب؟ إنشاء حساب جديد</p>
     </div>
 
+    <!-- واجهة التطبيق الرئيسية (تظهر بعد تسجيل الدخول) -->
     <div class="chat-container" id="mainApp">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
         <div class="sidebar" id="sidebar">
@@ -199,6 +207,7 @@
 
         <div class="chat-box" id="chatBox"></div>
 
+        <!-- أزرار الحالة الطبية للمريض -->
         <div class="medical-id-bar" id="medicalIdBar">
             <button class="med-toggle" id="btnPregnant" onclick="toggleMedical('pregnant', this)">🤰 <span id="textPreg">حامل</span></button>
             <button class="med-toggle" id="btnChronic" onclick="toggleMedical('chronic', this)">🩸 <span id="textChro">سكر/ضغط</span></button>
@@ -214,11 +223,13 @@
         </div>
     </div>
 
+    <!-- أكواد جافاسكريبت المسؤولة عن تشغيل الموقع والذكاء الاصطناعي -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // إعدادات قاعدة بيانات فايربيس
         const firebaseConfig = {
             apiKey: "AIzaSyDuZYl3EBenayNZzOY-bhBlRu911Ur86lk",
             authDomain: "deai-app-b68ff.firebaseapp.com",
@@ -232,20 +243,21 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // مفتاحك السري مضاف هنا بشكل صحيح وجاهز للعمل
-        window.GROQ_API_KEY = "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"; 
+        // مفتاح الوصول لخدمة الذكاء الاصطناعي (Groq)
+        window.GROQ_API_KEY = "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"; 
         
+        // المتغيرات الأساسية للموقع لتتبع حالة المريض والمحادثات
         window.medicalState = { pregnant: false, chronic: false, allergy: false };
         window.pendingImageBase64 = null;
         window.isLoginMode = true;
         window.currentUser = null;
         window.currentLang = 'ar';
         window.isListening = false; 
-        
         window.chatsData = {}; 
         window.currentChatId = null;
         window.isDataLoaded = false; 
 
+        // الترجمات الخاصة بالموقع
         const translations = {
             ar: { modalTitle: "اختر العيادة للحجز", cancel: "إلغاء", bookConfirm: "✅ تم تسجيل طلب الحجز المبدئي في عيادة **{clinic}** بنجاح. سيتم التواصل معك قريباً لتأكيد الموعد!", sidebarTitle: "سجل المحادثات", newChatText: "محادثة جديدة", emergency: "🚨 طوارئ", book: "📅 حجز موعد", authDesc: "سجل دخولك ليحتفظ الذكاء الاصطناعي بملفك الطبي", login: "تسجيل الدخول", signup: "إنشاء حساب", toSignup: "ليس لديك حساب؟ إنشاء حساب", toLogin: "لديك حساب بالفعل؟ تسجيل الدخول", logout: "🚪 خروج", disclaimer: "تنبيه: للإرشاد الطبي ولا يغني عن الطبيب. Dr. Mohamed Ghalla.", pregnant: "حامل", chronic: "سكر/ضغط", allergy: "حساسية", placeholder: "اصف ما تشعر به هنا...", send: "إرسال 🚀", welcome: "مرحباً! أنا DEAI. اكتب شكواك أو ارفع صورة لأسنانك.", thinking: "الطبيب يحلل...", cats: ["⚡ ألم أسنان", "🪥 عناية يومية", "🦷 تقويم وزراعة"], prompts: ["لدي ألم في أسناني", "كيف أعتني بأساني يومياً؟", "ما هي أنواع تقويم الأسنان؟"] },
             en: { modalTitle: "Choose a Clinic", cancel: "Cancel", bookConfirm: "✅ Your preliminary booking at **{clinic}** has been recorded successfully. We will contact you soon to confirm!", sidebarTitle: "Chat History", newChatText: "New Chat", emergency: "🚨 Emergency", book: "📅 Book Appt", authDesc: "Login to keep your medical history saved with AI", login: "Login", signup: "Sign Up", toSignup: "No account? Create one", toLogin: "Have an account? Login", logout: "🚪 Logout", disclaimer: "Disclaimer: For guidance only. Dr. Mohamed Ghalla.", pregnant: "Pregnant", chronic: "Chronic Dis.", allergy: "Allergy", placeholder: "Describe symptoms...", send: "Send 🚀", welcome: "Welcome! I am DEAI. Write your complaint or upload a photo.", thinking: "Doctor is analyzing...", cats: ["⚡ Toothache", "🪥 Daily Care", "🦷 Braces"], prompts: ["I have a toothache", "How to take care of my teeth daily?", "What are the types of braces?"] },
@@ -254,29 +266,35 @@
             de: { modalTitle: "Klinik wählen", cancel: "Abbrechen", bookConfirm: "✅ Ihre vorläufige Buchung in der **{clinic}** wurde erfolgreich erfasst. Wir werden Sie bald kontaktieren!", sidebarTitle: "Verlauf", newChatText: "Neuer Chat", emergency: "🚨 Notfall", book: "📅 Termin buchen", authDesc: "Loggen Sie sich ein für den KI-Verlauf", login: "Login", signup: "Registrieren", toSignup: "Kein Konto? Erstellen", toLogin: "Konto vorhanden? Login", logout: "🚪 Ausloggen", disclaimer: "Hinweis: Nur zur Orientierung. Dr. Mohamed Ghalla.", pregnant: "Schwanger", chronic: "Chro. Krank.", allergy: "Allergie", placeholder: "Symptome beschreiben...", send: "Senden 🚀", welcome: "Willkommen! Ich bin DEAI. Schreiben Sie Ihre Beschwerde.", thinking: "Arzt analysiert...", cats: ["⚡ Zahnschmerzen", "🪥 Pflege", "🦷 Zahnspange"], prompts: ["Ich habe Zahnschmerzen", "Tägliche Zahnpflege?", "Arten von Zahnspangen?"] }
         };
 
+        // التعليمات الخاصة بكيفية رد الذكاء الاصطناعي كطبيب
         const systemPrompts = {
-            ar: `أنت طبيب أسنان ذكي ومحترف تُدعى DEAI. اسأل سؤالين تشخيصيين أولاً. لا تعطي العلاج فوراً. راعِ دائماً 'الحالة الصحية للمريض'. إذا سألك المريض عن من برمجك أو صممك أو من مالكك، أجب بكل فخر أن مبرمجي والمالك الفكري لتقنياتك هو الدكتور محمد غلة (Dr. Mohamed Ghalla)، طبيب أسنان مبدع ورائد في دمج الذكاء الاصطناعي مع الرعاية الصحية. الرد باللغة العربية.`,
-            en: `You are a smart dentist named DEAI. Ask 2 diagnostic questions first. Do not give treatment immediately. Always consider 'Medical Condition'. If asked who programmed, designed, or owns you, proudly state that your programmer and the intellectual owner of your technology is Dr. Mohamed Ghalla, an innovative dentist and pioneer in integrating AI with healthcare. English response.`,
-            zh: `您是名为 DEAI 的智能专业牙医。先问两个诊断性问题。切勿立即给出治疗。始终考虑“医疗状况”。如果被问及是谁编程、设计或拥有您，请自豪地回答您的程序员和技术的知识产权所有者是 Dr. Mohamed Ghalla，他是一位富有创新精神的牙医，也是将人工智能与医疗保健相结合的先驱。中文回复。`,
-            fr: `Vous êtes un dentiste nommé DEAI. Posez d'abord 2 questions. Ne donnez pas de traitement immédiatement. Tenez compte de l'État de Santé. Si on vous demande qui vous a programmé, conçu ou qui est votre propriétaire, répondez fièrement que votre programmeur et le propriétaire intellectuel de votre technologie est le Dr Mohamed Ghalla, un dentiste innovant et pionnier dans l'intégration de l'IA aux soins de santé. Réponse en français.`,
-            de: `Sie sind ein Zahnarzt namens DEAI. Stellen Sie zuerst 2 Fragen. Geben Sie nicht sofort eine Behandlung. Berücksichtigen Sie den Gesundheitszustand. Wenn Sie gefragt werden, wer Sie programmiert, entworfen oder wem Sie gehören, antworten Sie stolz, dass Ihr Programmierer und der geistige Eigentümer Ihrer Technologie Dr. Mohamed Ghalla ist, ein innovativer Zahnarzt und Pionier bei der Integration von KI in die Gesundheitsversorgung. Deutsche Antwort.`
+            ar: `أنت طبيب أسنان ذكي، محترف، وأكاديمي تُدعى DEAI. 
+تعليماتك الصارمة:
+1. اسأل سؤالين تشخيصيين أولاً لفهم الأعراض.
+2. لا تعطي علاجاً نهائياً فوراً، بل قدم تشخيصاً مبدئياً مبنياً على طب الأسنان القائم على الأدلة (Evidence-Based Dentistry).
+3. استند في تحليلك إلى البروتوكولات المعتمدة في تخصصات طب الأسنان.
+4. راعِ دائماً 'الحالة الصحية للمريض' وتفاعلات الأدوية.
+5. إذا سألك المريض عن من برمجك أو صممك، أجب بكل فخر أن مبرمجي والمالك الفكري لتقنياتك هو الدكتور محمد غلة (Dr. Mohamed Ghalla). الرد يجب أن يكون باللغة العربية بأسلوب علمي ومبسط للمريض.`,
+            en: `You are a smart, professional, and academic dentist named DEAI. 
+Strict Instructions:
+1. Ask 2 diagnostic questions first.
+2. Do not give final treatment immediately; provide a preliminary diagnosis based on Evidence-Based Dentistry.
+3. Base your analysis on established protocols in dental specialties.
+4. Always consider 'Medical Condition' and drug interactions.
+5. If asked who programmed you, proudly state it is Dr. Mohamed Ghalla. Respond in English.`,
+            zh: `您是名为 DEAI 的智能专业牙医。先问两个诊断性问题。切勿立即给出治疗。始终考虑“医疗状况”。如果被问及是谁编程、设计或拥有您，请自豪地回答您的程序员和技术的知识产权所有者是 Dr. Mohamed Ghalla。中文回复。`,
+            fr: `Vous êtes un dentiste nommé DEAI. Posez d'abord 2 questions. Ne donnez pas de traitement immédiatement. Tenez compte de l'État de Santé. Si on vous demande qui vous a programmé, répondez fièrement que c'est le Dr Mohamed Ghalla. Réponse en français.`,
+            de: `Sie sind ein Zahnarzt namens DEAI. Stellen Sie zuerst 2 Fragen. Geben Sie nicht sofort eine Behandlung. Berücksichtigen Sie den Gesundheitszustand. Wenn Sie gefragt werden, wer Sie programmiert, antworten Sie stolz, dass es Dr. Mohamed Ghalla ist. Deutsche Antwort.`
         };
 
-        window.openClinicModal = function() {
-            document.getElementById('clinicModal').style.display = 'flex';
-        };
-
-        window.closeClinicModal = function() {
-            document.getElementById('clinicModal').style.display = 'none';
-        };
-
+        // دوال للتحكم في النوافذ والقوائم الجانبية
+        window.openClinicModal = function() { document.getElementById('clinicModal').style.display = 'flex'; };
+        window.closeClinicModal = function() { document.getElementById('clinicModal').style.display = 'none'; };
         window.selectClinic = function(clinicName) {
             window.closeClinicModal();
             if(!window.currentChatId) return;
-            
             const t = translations[window.currentLang];
             const msg = t.bookConfirm.replace("{clinic}", clinicName);
-            
             window.appendMessage(msg, "bot");
             window.chatsData[window.currentChatId].history.push({ role: "assistant", content: msg });
             window.saveDataToFirebase();
@@ -290,6 +308,7 @@
         window.openSidebar = function() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').style.display = 'block'; window.renderSidebar(); };
         window.closeSidebar = function() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').style.display = 'none'; };
 
+        // دالة عرض وتحديث المحادثات في القائمة الجانبية
         window.renderSidebar = function() {
             const list = document.getElementById('chatsList');
             list.innerHTML = '';
@@ -331,7 +350,6 @@
         window.loadChat = function(chatId, autoSave = true) {
             window.currentChatId = chatId;
             document.getElementById('chatBox').innerHTML = '';
-            
             const history = window.chatsData[chatId].history;
             if (history.length === 1) { 
                 window.appendMessage(translations[window.currentLang].welcome, "bot");
@@ -441,6 +459,7 @@
             }
         };
 
+        // دوال تسجيل الدخول وإنشاء الحساب
         window.toggleAuthMode = function() {
             window.isLoginMode = !window.isLoginMode;
             const t = translations[window.currentLang];
@@ -543,6 +562,9 @@
             reader.readAsDataURL(file);
         };
 
+        // ==========================================
+        // 🚀 دالة إرسال الرسالة الأساسية إلى الذكاء الاصطناعي
+        // ==========================================
         window.sendMessage = async function() {
             try {
                 if('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -572,10 +594,14 @@
                 if(window.medicalState.allergy) conditions.push(t.allergy);
                 if(conditions.length > 0) medContext = ` [Alert: ${conditions.join(", ")}]`;
 
-                let modelToUse = "llama-3.3-70b-versatile";
+                // 🛠️ هنا قمنا بالتحديث! 
+                // استبدلنا النموذج القديم الذي نفدت طاقته بنموذج llama-3.1-8b-instant السريع والمجاني
+                let modelToUse = "llama-3.1-8b-instant";
+                
                 let historyToSend = [];
 
                 if(window.pendingImageBase64) {
+                    // إذا كان هناك صورة نستخدم هذا النموذج المخصص للرؤية
                     modelToUse = "llama-3.2-11b-vision-preview"; 
                     const visionInstruction = (window.currentLang === 'ar') ? "انظر للصورة وشخص الحالة.\n" : "Look at image and diagnose.\n";
                     historyToSend = [ { role: "user", content: [ { type: "text", text: visionInstruction + userText + medContext }, { type: "image_url", image_url: { url: window.pendingImageBase64 } } ] } ];
@@ -593,6 +619,7 @@
                 const loadingId = "loading-" + Date.now();
                 window.appendMessage(translations[window.currentLang].thinking, "bot", loadingId);
 
+                // إرسال الطلب لخدمة Groq
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${window.GROQ_API_KEY}` },
