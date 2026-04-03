@@ -243,8 +243,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // مفتاح الوصول لخدمة الذكاء الاصطناعي (Groq)
-        window.GROQ_API_KEY = "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"; 
+        // وضعنا هنا مفاتيح الوصول لخدمة الذكاء الاصطناعي (Groq) في مصفوفة (Array)
+        window.GROQ_API_KEYS = [
+            "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",
+            "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",
+            "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",
+            "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"
+        ];
         
         // المتغيرات الأساسية للموقع لتتبع حالة المريض والمحادثات
         window.medicalState = { pregnant: false, chronic: false, allergy: false };
@@ -563,7 +568,7 @@ Strict Instructions:
         };
 
         // ==========================================
-        // 🚀 دالة إرسال الرسالة الأساسية إلى الذكاء الاصطناعي
+        // 🚀 دالة إرسال الرسالة الأساسية إلى الذكاء الاصطناعي (محدثة بنظام التبديل التلقائي)
         // ==========================================
         window.sendMessage = async function() {
             try {
@@ -594,14 +599,10 @@ Strict Instructions:
                 if(window.medicalState.allergy) conditions.push(t.allergy);
                 if(conditions.length > 0) medContext = ` [Alert: ${conditions.join(", ")}]`;
 
-                // 🛠️ هنا قمنا بالتحديث! 
-                // استبدلنا النموذج القديم الذي نفدت طاقته بنموذج llama-3.1-8b-instant السريع والمجاني
                 let modelToUse = "llama-3.1-8b-instant";
-                
                 let historyToSend = [];
 
                 if(window.pendingImageBase64) {
-                    // إذا كان هناك صورة نستخدم هذا النموذج المخصص للرؤية
                     modelToUse = "llama-3.2-11b-vision-preview"; 
                     const visionInstruction = (window.currentLang === 'ar') ? "انظر للصورة وشخص الحالة.\n" : "Look at image and diagnose.\n";
                     historyToSend = [ { role: "user", content: [ { type: "text", text: visionInstruction + userText + medContext }, { type: "image_url", image_url: { url: window.pendingImageBase64 } } ] } ];
@@ -619,26 +620,51 @@ Strict Instructions:
                 const loadingId = "loading-" + Date.now();
                 window.appendMessage(translations[window.currentLang].thinking, "bot", loadingId);
 
-                // إرسال الطلب لخدمة Groq
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${window.GROQ_API_KEY}` },
-                    body: JSON.stringify({ model: modelToUse, messages: historyToSend, temperature: 0.3 })
-                });
+                // --- التحديث الجديد: نظام التبديل التلقائي (Fallback) ---
+                let success = false;
+                let aiReply = "";
+                let errorMessage = "";
 
-                const data = await response.json();
+                for (let i = 0; i < window.GROQ_API_KEYS.length; i++) {
+                    const currentApiKey = window.GROQ_API_KEYS[i];
+                    
+                    try {
+                        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                            method: "POST",
+                            headers: { 
+                                "Content-Type": "application/json", 
+                                "Authorization": `Bearer ${currentApiKey}`
+                            },
+                            body: JSON.stringify({ model: modelToUse, messages: historyToSend, temperature: 0.3 })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.choices && data.choices.length > 0) {
+                            aiReply = data.choices[0].message.content;
+                            success = true;
+                            break; // نوقف حلقة التكرار لأننا نجحنا
+                        } else if (data.error) {
+                            errorMessage = data.error.message;
+                        }
+                    } catch (fetchError) {
+                        errorMessage = fetchError.message;
+                    }
+                }
+
                 if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
 
-                if (data.choices && data.choices.length > 0) {
-                    let aiReply = data.choices[0].message.content;
+                if (success) {
                     window.appendMessage(aiReply, "bot");
                     window.chatsData[window.currentChatId].history.push({ role: "assistant", content: aiReply });
                     window.saveDataToFirebase();
-                } else if (data.error) {
-                    window.appendMessage("🛑 خطأ (API Key): " + data.error.message, "bot");
+                } else {
+                    window.appendMessage("🛑 عذراً، جميع خوادمنا مشغولة حالياً للضغط الشديد. يرجى المحاولة بعد قليل. (" + errorMessage + ")", "bot");
                 }
+                // --- نهاية التحديث الجديد ---
+
             } catch (error) {
-                window.appendMessage(`🛑 عطل: ${error.message}`, "bot");
+                window.appendMessage(`🛑 عطل غير متوقع: ${error.message}`, "bot");
             } finally {
                 document.getElementById("userInput").disabled = false; 
                 document.getElementById("sendBtn").disabled = false; 
